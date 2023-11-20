@@ -1,0 +1,54 @@
+{
+  "name": "@seneca/redux",
+  "version": "0.0.1",
+  "description": "Seneca browser library fo redux",
+  "license": "MIT",
+  "main": "dist/seneca-redux.cjs.js",
+  "module": "dist/seneca-redux.es.js",
+  "types": "dist/seneca-redux.d.ts",
+  "source": "src/seneca-redux.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/seneca-redux.es.js",
+      "require": "./dist/seneca-redux.umd.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "tsc && vite build --watch",
+    "start": "vite --host --open",
+    "build": "tsc && vite build",
+    "build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
+    "test": "echo test",
+    "clean": "rm -rf node_modules yarn.lock package-lock.json",
+    "reset": "npm run clean && npm install && npm run build && npm test",
+    "prep-dev": "npm link @plantquest/assetmap",
+    "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags",
+    "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
+    "repo-publish-quick": "npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org "
+  },
+  "devDependencies": {
+    "@reduxjs/toolkit": "^1.9.7",
+    "@types/react": "^18.2.37",
+    "@types/react-dom": "^18.2.15",
+    "@typescript-eslint/eslint-plugin": "^6.11.0",
+    "@typescript-eslint/parser": "^6.11.0",
+    "@vitejs/plugin-react": "^4.2.0",
+    "dts-bundle-generator": "^8.1.2",
+    "eslint": "^8.54.0",
+    "eslint-config-prettier": "^9.0.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0",
+    "react": "^18.2.0",
+    "stylelint": "^15.11.0",
+    "stylelint-config-recommended": "^13.0.0",
+    "stylelint-config-sass-guidelines": "^10.0.0",
+    "ts-node": "^10.9.1",
+    "tslib": "^2.6.2",
+    "typescript": "^5.2.2",
+    "vite": "^5.0.0",
+    "vite-plugin-dts": "^3.6.3"
+  }
+}
