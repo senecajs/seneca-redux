@@ -17,6 +17,10 @@ const seneca = new Seneca({legacy:false})
       .use('gateway$public', {
         allow: {
           'aim:req': true,
+        },
+        error: {
+          message: true,
+          details: true,
         }
       })
       .use('gateway-express$public', {})
@@ -40,26 +44,37 @@ const seneca = new Seneca({legacy:false})
       .use(function count() {
         const seneca = this
         
-        seneca.message('aim:count,cmd:incr', { incr: Number }, async function(msg) {
-          return {ok:true,incr:msg.incr}
-        })
+        seneca
+          .message('aim:count,cmd:incr', { incr: Number }, async function(msg) {
+            return {ok:true,incr:msg.incr}
+          })
+          .message('aim:count,cmd:error', { message: String }, async function(msg) {
+            if(msg.reserr) {
+              return new Error(msg.message)
+            }
+            throw new Error(msg.message)
+          })
 
       })
 
       .use(function api() {
         const seneca = this
         
-        seneca.message('aim:req,on:count,cmd:incr', async function(msg) {
-          let res = await this.post('aim:count,cmd:incr', {incr:msg.incr})
-          if(!res.ok) {
-            return {ok:false,why:res.why}
-          }
-          return {
-            ok:true,
-            incr: res.incr
-          }
-        })
-
+        seneca
+          .message('aim:req,on:count,cmd:incr', async function(msg) {
+            let res = await this.post('aim:count,cmd:incr', {incr:msg.incr})
+            if(!res.ok) {
+              return {ok:false,why:res.why}
+            }
+            return {
+              ok:true,
+              incr: res.incr
+            }
+          })
+          .message('aim:req,on:count,cmd:error', async function(msg) {
+            return this.post('aim:count,on:null', msg)
+          })
+        
         seneca
           .fix('aim:req,on:entity')
           .message('cmd:save', async function save(msg) {
@@ -75,7 +90,6 @@ const seneca = new Seneca({legacy:false})
             }
           })
           .message('cmd:list', async function save(msg) {
-            // throw new Error('qqq')
             return {
               ok: true,
               list: (await this.entity(msg.canon).list$(msg.q)).map((n) =>

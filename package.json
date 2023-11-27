@@ -31,8 +31,8 @@
   },
   "devDependencies": {
     "@reduxjs/toolkit": "^1.9.7",
-    "@seneca/gateway": "^0.8.0",
-    "@seneca/gateway-express": "^0.9.0",
+    "@seneca/gateway": "^0.9.0",
+    "@seneca/gateway-express": "^0.10.0",
     "@seneca/repl": "^6.2.3",
     "@types/react": "^18.2.38",
     "@types/react-dom": "^18.2.17",
