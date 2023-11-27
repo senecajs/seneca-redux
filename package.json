@@ -1,7 +1,7 @@
 {
   "name": "@seneca/redux",
   "version": "0.0.1",
-  "description": "Seneca browser library fo redux",
+  "description": "Seneca browser library for redux",
   "license": "MIT",
   "main": "dist/seneca-redux.cjs.js",
   "module": "dist/seneca-redux.es.js",
