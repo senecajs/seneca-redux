@@ -13,7 +13,9 @@ function redux(this: any, options: any) {
   const seneca = this
   const deep = seneca.util.deep
 
-  console.log('RO', options)
+  if (options.debug) {
+    console.log('@seneca/redux', '001', options)
+  }
 
   const name = options.name
   const extStore = options.store
@@ -64,10 +66,15 @@ function redux(this: any, options: any) {
 
           canonMap[canon] = (canonMap[canon] || {
             list: [],
-            state: { list: 'initial' }
+            slot: {},
+            state: { list: 'initial', slot: {} }
           })
 
           if (null != res && 'load' === msg.cmd || 'save' === msg.cmd) {
+            const slot = msg.slot$ || options.entity.slot
+            canonMap[canon].slot[slot] = { ...res }
+            canonMap[canon].state.slot[slot] = { id: res.id, when: Date.now(), cmd: msg.cmd }
+
             let found = false
             canonMap[canon].list = canonMap[canon].list.map(
               (item: any) => {
@@ -180,6 +187,7 @@ function redux(this: any, options: any) {
 
 redux.defaults = {
   name: 'seneca',
+  debug: false,
   state: Default({
     entity: {
       main: {}
@@ -193,6 +201,7 @@ redux.defaults = {
   entity: {
     root: 'entity',
     space: Default(['main'], [String]), // ['main'], // Min(1, ['main']),
+    slot: 'current',
     pin: Any('on:entity'), // Default('on:entity', One(String, Object, [One(String, Object)]))
     canonMap: (state: any, msg: any, options: any) => {
       let space = msg.space$ || options.entity.space[0]

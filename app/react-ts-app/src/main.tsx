@@ -5,9 +5,15 @@ import { Provider } from 'react-redux'
 import Seneca from 'seneca-browser'
 import SenecaEntity from 'seneca-entity'
 import SenecaBrowserStore from '@seneca/browser-store'
-import SenecaRedux, { SenecaProvider } from '@seneca/redux'
 
-import App from './App.tsx'
+// NOTE: also change App.tsx
+// Use this for local development.
+import SenecaRedux, { SenecaProvider } from '@seneca/redux-dev'
+// Use this to validate a published version.
+// import SenecaRedux, { SenecaProvider } from '@seneca/redux'
+
+
+import App from './App'
 import './index.css'
 
 
@@ -22,7 +28,7 @@ const seneca = Seneca({
       fetch: {
         credentials: 'include'
       }
-    }
+    }   
   },
   timeout: 98765
 })
@@ -33,6 +39,7 @@ const seneca = Seneca({
     debug: true
   })
   .use(SenecaRedux, {
+    debug: true,
     state: {
       count: 0
     }
@@ -55,7 +62,7 @@ const seneca = Seneca({
     // Handle response to specific message.
     seneca
       .add('aim:res,on:count,cmd:incr', function(msg:any) {
-        let {state,res,req} = msg.res()
+        let {state,res} = msg.res()
         state.count += res.incr
       })
   })

@@ -20,11 +20,13 @@ declare function redux(this: any, options: any): {
 declare namespace redux {
     var defaults: {
         name: string;
+        debug: boolean;
         state: Node_2<{}>;
         store: {};
         entity: {
             root: string;
             space: Node_2<StringConstructor[]>;
+            slot: string;
             pin: Node_2<string>;
             canonMap: (state: any, msg: any, options: any) => any;
         };

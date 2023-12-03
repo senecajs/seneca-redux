@@ -12,7 +12,8 @@
   "dependencies": {
     "@reduxjs/toolkit": "^1.9.7",
     "@seneca/browser-store": "^0.0.4",
-    "@seneca/redux": "file:../..",
+    "@seneca/redux": "^0.0.1",
+    "@seneca/redux-dev": "file:../..",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-redux": "^8.1.3",

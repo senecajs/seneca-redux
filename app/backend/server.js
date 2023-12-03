@@ -45,10 +45,10 @@ const seneca = new Seneca({legacy:false})
         const seneca = this
         
         seneca
-          .message('aim:count,cmd:incr', { incr: Number }, async function(msg) {
+          .message('aim:count,cmd:incr', { incr: Number }, async function cmdIncr(msg) {
             return {ok:true,incr:msg.incr}
           })
-          .message('aim:count,cmd:error', { message: String }, async function(msg) {
+          .message('aim:count,cmd:error', { message: String }, async function cmdError(msg) {
             if(msg.reserr) {
               return new Error(msg.message)
             }
