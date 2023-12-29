@@ -4,7 +4,7 @@ import { Provider } from 'react-redux'
 
 import Seneca from 'seneca-browser'
 import SenecaEntity from 'seneca-entity'
-import SenecaBrowserStore from '@seneca/browser-store'
+import BrowserStore from '@seneca/browser-store'
 
 // NOTE: also change App.tsx
 // Use this for local development.
@@ -15,7 +15,6 @@ import SenecaRedux, { SenecaProvider } from '@seneca/redux-dev'
 
 import App from './App'
 import './index.css'
-
 
 
 const seneca = Seneca({
@@ -35,13 +34,17 @@ const seneca = Seneca({
   // .test('print')
   .test()
   .use(SenecaEntity)
-  .use(SenecaBrowserStore, {
+  .use(BrowserStore, {
     debug: true
   })
   .use(SenecaRedux, {
     debug: true,
     state: {
       count: 0
+    },
+    slots: {
+      'foo': {},
+      'bar': {},
     }
   })
   
@@ -73,7 +76,7 @@ const seneca = Seneca({
 
     ReactDOM.createRoot(document.getElementById('root')!).render(
       <React.StrictMode>
-        <Provider store={seneca.export('redux/store')}>
+        <Provider store={seneca.export('Redux/store')}>
           <SenecaProvider seneca={seneca}>
             <App />
           </SenecaProvider>

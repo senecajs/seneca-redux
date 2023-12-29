@@ -16,11 +16,18 @@ const seneca = new Seneca({legacy:false})
       .use('repl')
       .use('gateway$public', {
         allow: {
-          'aim:req': true,
+          'aim:req,on:count': [],
+          'aim:req,on:entity,cmd:*': [
+            'canon:"-/-/foo"'
+          ]
         },
         error: {
           message: true,
           details: true,
+        },
+        debug: {
+          response: true,
+          log: true,
         }
       })
       .use('gateway-express$public', {})

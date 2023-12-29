@@ -3,29 +3,92 @@ import { createSlice, configureStore } from '@reduxjs/toolkit'
 
 import { Gubu } from 'gubu'
 
+import Pkg from '../package.json'
+
+
+// TODO: remove slots - just use spaces
+// each space has one list and one item
+// TODO: don't use canons - use sub props: foo.bar - better DX
+
+
 const { One, Default, Any, Min, Skip, Required, Open } = Gubu
 
 
-// TODO: set state
+type SenecaReduxFullOptions = {
+  name: string
+  debug: boolean
+  log: {
+    err: boolean
+    msg: boolean
+  }
+  state: any
+  store: any
+  slots: Record<string, any>
+}
+
+type SenecaReduxOptions = Partial<SenecaReduxFullOptions>
 
 
-function redux(this: any, options: any) {
+const defaults: SenecaReduxFullOptions = {
+  name: 'seneca',
+  debug: false,
+  log: {
+    err: true,
+    msg: false,
+  },
+  state: Default({
+  }, Open({}))/*.Default({
+    entity: {
+      main: {}
+    }
+  })*/,
+  store: {},
+
+  slots: {
+  },
+}
+
+
+const pname = '@seneca/redux'
+
+
+function Redux(this: any, options: any) {
   const seneca = this
   const deep = seneca.util.deep
 
   if (options.debug) {
-    console.log('@seneca/redux', '001', options)
+    console.warn(pname, Pkg.version, options)
   }
 
   const name = options.name
   const extStore = options.store
+  const errlog: any[] = []
+  const msglog: any[] = []
 
-  // const matchEntity = seneca.util.Patrun()
-  // seneca.util.pins(options.entity.pin).forEach((p: any) => matchEntity.add(p, true))
 
-  const initialState = options.state
-  initialState[options.entity.root] =
-    options.entity.space.reduce((a: any, n: string) => (a[n] = {}, a), {})
+  function log(kind: string, msg: any, res?: any) {
+    if (options.log.err && isError(res)) {
+      res.when$ = Date.now()
+      res.kind$ = kind
+      errlog.push(res)
+    }
+
+    if (options.log.msg) {
+      msglog.push({
+        msg,
+        res,
+        when$: Date.now(),
+        kind$: kind,
+      })
+    }
+  }
+
+
+  const initialState: any = options.state
+
+  for (let slotPath in options.slots) {
+    entityPrepare(initialState, slotPath)
+  }
 
   const slice = createSlice({
     name,
@@ -36,6 +99,8 @@ function redux(this: any, options: any) {
 
         let msg = payload.msg
         let res = payload.res
+
+        log('response', msg, res)
 
         let resmsg = { ...msg, aim: 'res' }
 
@@ -53,58 +118,109 @@ function redux(this: any, options: any) {
 
         let msg = payload.msg
         let res = payload.res
+        // console.log('ER', msg, res)
 
-        if (isError(res)) {
-          // TODO: error log?
-          console.log('ENT ERR', res)
+
+        let cmd = msg.cmd
+        let kind = 'list' === cmd ? 'list' : 'item'
+
+        log('entity', msg, res)
+
+        let path = msg.slot$ || msg.q?.slot$ || msg.ent?.slot$
+
+        if (null == path || false === path) {
           return
         }
 
-        else if (false !== msg.q?.store$ && false !== msg.ent?.store$ && res) {
-          let canon = (msg.ent || msg.qent).entity$.replace(/^(-\/)+/, '')
-          let canonMap = options.entity.canonMap(state, msg, options)
+        if (true === path) {
+          path = ''
+        }
 
-          canonMap[canon] = (canonMap[canon] || {
-            list: [],
-            slot: {},
-            state: { list: 'initial', slot: {} }
-          })
+        let { space, slot } = parseSlot(path)
+        // console.log('ERp', path, space, slot)
+        let spaceRoot = descend(state, space, true)
+        // console.log('ERr', kind, JSON.stringify(spaceRoot))
+        if (null == spaceRoot) {
+          throw new Error('Entity space not prepared: ' + space.join('.'))
+        }
 
-          if (null != res && 'load' === msg.cmd || 'save' === msg.cmd) {
-            const slot = msg.slot$ || options.entity.slot
-            canonMap[canon].slot[slot] = { ...res }
-            canonMap[canon].state.slot[slot] = { id: res.id, when: Date.now(), cmd: msg.cmd }
+        let slotMeta = spaceRoot.meta && spaceRoot.meta[slot]
+        if (null == slotMeta) {
+          throw new Error('Entity slot not prepared: ' + path)
+        }
+
+        let slotKind = slotMeta[kind]
+
+        slotKind.error = null
+        slotKind.when = Date.now()
+
+        if (isError(res)) {
+
+          if (options.debug) {
+            console.warn(pname, 'entity-error', msg, res)
+          }
+
+          slotKind.state = 'error'
+          slotKind.error = { ...res }
+
+          return
+        }
+
+        // Don't store in redux if store$ directive is false
+        else if (null != res) {
+          if ('load' === cmd || 'save' === cmd) {
+            let item = spaceRoot.item[slot] = { ...res }
+            let list = spaceRoot.list[slot]
 
             let found = false
-            canonMap[canon].list = canonMap[canon].list.map(
-              (item: any) => {
-                if (item.id === res.id) {
+            spaceRoot.list[slot] = list.map(
+              (entry: any) => {
+                if (entry.id === item.id) {
                   found = true
-                  return { ...item, ...res }
-                } else {
-                  return item
+                  return { ...entry, ...item }
+                }
+                else {
+                  return entry
                 }
               }
             )
             if (!found) {
-              canonMap[canon].list.push({ ...res })
+              spaceRoot.list[slot] = list.concat({ ...item })
+              // list.push({ ...item })
             }
+            // console.log('ITEM', found, list)
+
+            slotKind.state = 'load' === cmd ? 'loaded' : 'saved'
           }
 
-          else if ('list' === msg.cmd) {
-            let canonMap = options.entity.canonMap(state, msg, options)
-            canonMap[canon].list = res.map((item: any) => ({
-              ...item
+          else if ('list' === cmd) {
+            spaceRoot.list[slot] = res.map((entry: any) => ({
+              ...entry
             }))
-            canonMap[canon].state.list = 'loaded'
+            slotKind.state = 'listed'
           }
         }
+        else if ('remove' === cmd) {
+          let removed: string[] = [msg.q?.id]
+          spaceRoot.list[slot] =
+            spaceRoot.list[slot].filter((entry: any) => !removed.includes(entry.id))
+          if (spaceRoot.item[slot] && removed.includes(spaceRoot.item[slot].id)) {
+            spaceRoot.item[slot] = null
+            spaceRoot.meta[slot].item.state = 'removed'
+          }
+        }
+        else {
+          slotKind.state = 'done'
+        }
       },
+
 
       update: (state: any, action: any) => {
         let payload: any = action.payload
 
         let msg = payload.msg
+
+        log('update', msg)
 
         // Either one section and content, or multiple section and content updates.
         let updatelist: any =
@@ -133,7 +249,13 @@ function redux(this: any, options: any) {
     }
   })
 
-  const { response, entityResponse, update } = slice.actions
+  const {
+    response,
+    // entityPrepare,
+    entityResponse,
+    update
+  } = slice.actions
+
 
   const store = configureStore(deep(extStore, {
     reducer: {
@@ -175,41 +297,107 @@ function redux(this: any, options: any) {
         reply(msg)
       })
 
+  const slotSelectors = (path?: string) => {
+    let { space, slot } = parseSlot(path)
+    return {
+      space,
+      slot,
+      selectItem: (state: any) => {
+        let root = descend(state.seneca, space)
+        return root.item[slot]
+      },
+      selectList: (state: any) => {
+        let root = descend(state.seneca, space)
+        return root.list[slot]
+      },
+      selectMeta: (state: any, kind: 'item' | 'list') => {
+        let root = descend(state.seneca, space)
+        return root.meta[slot][kind]
+      }
+    }
+  }
 
   return {
-    name: 'redux',
+    name: 'Redux',
     exports: {
       slice,
       store,
+      slotSelectors,
+      errlog,
+      msglog,
     }
   }
 }
 
-redux.defaults = {
-  name: 'seneca',
-  debug: false,
-  state: Default({
-    entity: {
-      main: {}
-    }
-  }, Open({}))/*.Default({
-    entity: {
-      main: {}
-    }
-  })*/,
-  store: {},
-  entity: {
-    root: 'entity',
-    space: Default(['main'], [String]), // ['main'], // Min(1, ['main']),
-    slot: 'current',
-    pin: Any('on:entity'), // Default('on:entity', One(String, Object, [One(String, Object)]))
-    canonMap: (state: any, msg: any, options: any) => {
-      let space = msg.space$ || options.entity.space[0]
-      return state[options.entity.root][space] = (state[options.entity.root][space] || {})
-    }
+
+function entityPrepare(state: any, path: string) {
+  let { space, slot } = parseSlot(path)
+
+  let spaceRoot = descend(state, space, true)
+
+  if (null == spaceRoot.meta) {
+    spaceRoot.meta = {}
+    spaceRoot.item = {}
+    spaceRoot.list = {}
   }
+
+  if (null == spaceRoot.meta[slot]) {
+    spaceRoot.meta[slot] = {
+      item: {
+        state: 'initial',
+        when: 0,
+        error: null,
+      },
+      list: {
+        state: 'initial',
+        when: 0,
+        error: null,
+      }
+    }
+    spaceRoot.list[slot] = []
+    spaceRoot.item[slot] = null
+  }
+
+  // console.log('PS A', space, slot)
 }
 
+function parseSlot(path?: string): { space: string[], slot: string } {
+  let [spacePath, slot] = 'string' === typeof path ? path.split('/') : ''
+
+  let hasSlot = null != slot && '' != slot
+  let hasSpace = null != spacePath && '' != spacePath
+
+  slot = hasSlot ? slot : hasSpace ? spacePath : 'main'
+  spacePath = hasSlot && hasSpace ? spacePath : '.entity'
+
+  if (!spacePath.endsWith('.entity')) {
+    spacePath += '.entity'
+  }
+
+  let space = spacePath.split('.').filter((p: any) => null != p && '' != p)
+
+  return { space, slot }
+}
+
+
+function descend(root: any, parts: string[], create: boolean = false): any {
+  let current = root
+  for (let pI = 0; pI < parts.length; pI++) {
+    let partName = parts[pI]
+    if (null == partName || '' == partName) {
+      continue
+    }
+
+    if (null == current[partName] && create) {
+      current = current[partName] = {}
+    }
+    else {
+      current = current[partName]
+    }
+  }
+
+  return current
+}
 
 function isError(x: any) {
   return Object.prototype.toString.call(x) === "[object Error]"
@@ -231,17 +419,25 @@ const useSeneca = () => {
 }
 
 
-redux.SenecaProvider = SenecaProvider
-redux.useSeneca = useSeneca
+
+Redux.defaults = defaults
+
+Redux.SenecaProvider = SenecaProvider
+Redux.useSeneca = useSeneca
 
 
 // Prevent name mangling
-Object.defineProperty(redux, 'name', { value: 'redux' })
+Object.defineProperty(Redux, 'name', { value: 'Redux' })
 
+
+export type {
+  SenecaReduxOptions
+}
 
 export {
   SenecaProvider,
   useSeneca,
+  Redux,
 }
 
-export default redux
+export default Redux

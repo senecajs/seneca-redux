@@ -10,7 +10,7 @@ export default defineConfig({
     sourcemap: true,
     lib: {
       entry: path.resolve(__dirname, "src/seneca-redux.ts"),
-      name: "mylib",
+      name: "SenecaRedux",
       formats: ["es", "cjs", "umd", "iife"],
       fileName: (format) => `seneca-redux.${format}.js`,
     },

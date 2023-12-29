@@ -14,7 +14,9 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "LICENSE"
   ],
   "scripts": {
     "dev": "tsc && vite build --watch",
@@ -22,7 +24,7 @@
     "build": "tsc && vite build",
     "build:types": "dts-bundle-generator --config ./dts-bundle-generator.config.ts",
     "test": "echo test",
-    "clean": "rm -rf node_modules yarn.lock package-lock.json",
+    "clean": "rm -rf dist node_modules yarn.lock package-lock.json",
     "reset": "npm run clean && npm install && npm run build && npm test",
     "prep-dev": "npm link @plantquest/assetmap",
     "repo-tag": "REPO_VERSION=`node -e \"console.log(require('./package').version)\"` && echo TAG: v$REPO_VERSION && git commit -a -m v$REPO_VERSION && git push && git tag v$REPO_VERSION && git push --tags",
@@ -30,33 +32,33 @@
     "repo-publish-quick": "npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org "
   },
   "devDependencies": {
-    "@reduxjs/toolkit": "^1.9.7",
+    "@reduxjs/toolkit": "^2.0.1",
     "@seneca/gateway": "^0.9.0",
     "@seneca/gateway-express": "^0.10.0",
-    "@seneca/repl": "^6.2.3",
-    "@types/react": "^18.2.38",
-    "@types/react-dom": "^18.2.17",
-    "@typescript-eslint/eslint-plugin": "^6.12.0",
-    "@typescript-eslint/parser": "^6.12.0",
-    "@vitejs/plugin-react": "^4.2.0",
+    "@seneca/repl": "^7.0.1",
+    "@types/react": "^18.2.45",
+    "@types/react-dom": "^18.2.18",
+    "@typescript-eslint/eslint-plugin": "^6.15.0",
+    "@typescript-eslint/parser": "^6.15.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "cookie-parser": "^1.4.6",
-    "dts-bundle-generator": "^8.1.2",
-    "eslint": "^8.54.0",
-    "eslint-config-prettier": "^9.0.0",
-    "eslint-plugin-prettier": "^5.0.1",
+    "dts-bundle-generator": "^9.0.0",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.1.1",
     "express": "^4.18.2",
-    "prettier": "^3.1.0",
+    "prettier": "^3.1.1",
     "react": "^18.2.0",
     "seneca": "^3.33.0",
-    "seneca-entity": "^25.1.0",
+    "seneca-entity": "^25.1.1",
     "seneca-promisify": "^3.7.1",
-    "stylelint": "^15.11.0",
-    "stylelint-config-recommended": "^13.0.0",
+    "stylelint": "15",
+    "stylelint-config-recommended": "13",
     "stylelint-config-sass-guidelines": "^10.0.0",
-    "ts-node": "^10.9.1",
+    "ts-node": "^10.9.2",
     "tslib": "^2.6.2",
-    "typescript": "^5.3.2",
-    "vite": "^5.0.2",
-    "vite-plugin-dts": "^3.6.3"
+    "typescript": "^5.3.3",
+    "vite": "^5.0.10",
+    "vite-plugin-dts": "^3.6.4"
   }
 }
