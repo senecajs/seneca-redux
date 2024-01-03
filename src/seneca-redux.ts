@@ -56,6 +56,12 @@ function Redux(this: any, options: any) {
   const seneca = this
   const deep = seneca.util.deep
 
+  // NOTE: only ever add once
+  // if (null != this.find_plugin('Redux')) {
+  //  return;
+  // }
+
+
   if (options.debug) {
     console.warn(pname, Pkg.version, options)
   }
@@ -118,8 +124,6 @@ function Redux(this: any, options: any) {
 
         let msg = payload.msg
         let res = payload.res
-        // console.log('ER', msg, res)
-
 
         let cmd = msg.cmd
         let kind = 'list' === cmd ? 'list' : 'item'
@@ -245,15 +249,22 @@ function Redux(this: any, options: any) {
             }
           }
         }
-      }
+      },
+
+      modifier: (state: any, action: any) => {
+        let payload: any = action.payload
+        let modifier = payload.modifier
+        modifier(state)
+        return
+      },
     }
   })
 
   const {
     response,
-    // entityPrepare,
     entityResponse,
-    update
+    update,
+    modifier,
   } = slice.actions
 
 
@@ -268,6 +279,7 @@ function Redux(this: any, options: any) {
             name + '/response',
             name + '/entityResponse',
             name + '/update',
+            name + '/modifier',
           ]
         }
       })
@@ -296,6 +308,38 @@ function Redux(this: any, options: any) {
         store.dispatch(update({ msg, meta } as any))
         reply(msg)
       })
+
+  seneca.order.add.add({
+    name: 'redux_modifier',
+    before: 'prepare',
+    exec: function(spec: any) {
+      const args = spec.ctx.args
+      const pattern = args.pattern
+      const action = args.action
+
+      // console.log('ADD redux', pattern, action)
+
+      if (true === pattern.redux$ && null != action) {
+        let origAction = action
+        args.action = function(this: any, msg: any, reply: any, meta: any) {
+          // console.log('DISPATCH modifier', msg)
+          store.dispatch(modifier(
+            {
+              modifier: (state: any) => {
+                meta.custom.state = state
+                // console.log('ORIGACT', msg, meta.custom)
+                origAction.call(this, msg, reply, meta)
+              }
+            } as any))
+        }
+        Object.defineProperty(args.action, 'name', {
+          value: origAction.name + '_redux'
+        })
+        // console.log('ADD redux action', args.action)
+      }
+    }
+  })
+
 
   const slotSelectors = (path?: string) => {
     let { space, slot } = parseSlot(path)

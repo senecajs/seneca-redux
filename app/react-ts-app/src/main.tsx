@@ -33,6 +33,7 @@ const seneca = Seneca({
 })
   // .test('print')
   .test()
+  // .quiet()
   .use(SenecaEntity)
   .use(BrowserStore, {
     debug: true

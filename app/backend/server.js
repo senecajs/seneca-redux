@@ -18,7 +18,7 @@ const seneca = new Seneca({legacy:false})
         allow: {
           'aim:req,on:count': [],
           'aim:req,on:entity,cmd:*': [
-            'canon:"-/-/foo"'
+            { zone: null, base: null, name: 'foo' }
           ]
         },
         error: {
@@ -87,19 +87,19 @@ const seneca = new Seneca({legacy:false})
           .message('cmd:save', async function save(msg) {
             return {
               ok: true,
-              ent: (await this.entity(msg.canon).save$(msg.ent)).data$(),
+              ent: (await this.entity(canon(msg)).save$(msg.ent)).data$(),
             }
           })
           .message('cmd:load', async function save(msg) {
             return {
               ok: true,
-              ent: (await this.entity(msg.canon).load$(msg.q))?.data$(),
+              ent: (await this.entity(canon(msg)).load$(msg.q))?.data$(),
             }
           })
           .message('cmd:list', async function save(msg) {
             return {
               ok: true,
-              list: (await this.entity(msg.canon).list$(msg.q)).map((n) =>
+              list: (await this.entity(canon(msg)).list$(msg.q)).map((n) =>
                 n.data$(),
               ),
             }
@@ -107,7 +107,7 @@ const seneca = new Seneca({legacy:false})
           .message('cmd:remove', async function remove(msg) {
             return {
               ok: true,
-              ent: (await this.entity(msg.canon).remove$(msg.q))?.data$(),
+              ent: (await this.entity(canon(msg)).remove$(msg.q))?.data$(),
             }
           })
       })
@@ -125,6 +125,14 @@ const seneca = new Seneca({legacy:false})
         runExpress(seneca)
       })
 
+
+function canon(msg) {
+  return {
+    zone: msg.zone,
+    base: msg.base,
+    name: msg.name,
+  }
+}
 
 function runExpress(seneca) {
   const app = Express()

@@ -14,6 +14,7 @@ declare function Redux(this: any, options: any): {
             response: (state: any, action: any) => void;
             entityResponse: (state: any, action: any) => void;
             update: (state: any, action: any) => void;
+            modifier: (state: any, action: any) => void;
         }, any, any, SliceSelectors<any>>;
         store: EnhancedStore<any, UnknownAction, Tuple<[StoreEnhancer<{
             dispatch: ThunkDispatch<any, undefined, UnknownAction>;
