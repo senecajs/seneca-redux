@@ -2234,7 +2234,7 @@ const co = "@seneca/redux", lo = "0.0.1", fo = "Seneca browser library for redux
   },
   state: _o({}, ko({})),
   store: {},
-  slots: {}
+  slot: {}
 }, dn = "@seneca/redux";
 function it(e) {
   const t = this, n = t.util.deep;
@@ -2249,7 +2249,7 @@ function it(e) {
     });
   }
   const w = e.state;
-  for (let m in e.slots)
+  for (let m in e.slot)
     So(w, m);
   const v = no({
     name: o,
@@ -2368,7 +2368,7 @@ function it(e) {
           j.dispatch($(
             {
               modifier: (q) => {
-                U.custom.state = q, A.call(this, T, Z, U);
+                U.custom.state = () => q, A.call(this, T, Z, U);
               }
             }
           ));

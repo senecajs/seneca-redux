@@ -44,7 +44,7 @@ const defaults: SenecaReduxFullOptions = {
   })*/,
   store: {},
 
-  slots: {
+  slot: {
   },
 }
 
@@ -92,7 +92,8 @@ function Redux(this: any, options: any) {
 
   const initialState: any = options.state
 
-  for (let slotPath in options.slots) {
+  // TODO: expose as message so that slots can be added dynamically
+  for (let slotPath in options.slot) {
     entityPrepare(initialState, slotPath)
   }
 
@@ -326,7 +327,7 @@ function Redux(this: any, options: any) {
           store.dispatch(modifier(
             {
               modifier: (state: any) => {
-                meta.custom.state = state
+                meta.custom.state = () => state
                 // console.log('ORIGACT', msg, meta.custom)
                 origAction.call(this, msg, reply, meta)
               }
