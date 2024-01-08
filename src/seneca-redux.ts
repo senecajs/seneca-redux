@@ -23,7 +23,7 @@ type SenecaReduxFullOptions = {
   }
   state: any
   store: any
-  slots: Record<string, any>
+  slot: Record<string, any>
 }
 
 type SenecaReduxOptions = Partial<SenecaReduxFullOptions>

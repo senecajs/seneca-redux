@@ -50,7 +50,7 @@ declare type SenecaReduxFullOptions = {
     };
     state: any;
     store: any;
-    slots: Record<string, any>;
+    slot: Record<string, any>;
 };
 
 export declare type SenecaReduxOptions = Partial<SenecaReduxFullOptions>;
