@@ -2190,7 +2190,7 @@ var An = { exports: {} };
   });
 })(An);
 var fo = An.exports;
-const po = "@seneca/redux", ho = "0.0.1", yo = "Seneca browser library for redux", mo = "MIT", go = "dist/seneca-redux.cjs.js", vo = "dist/seneca-redux.es.js", bo = "dist/seneca-redux.d.ts", wo = "src/seneca-redux.ts", Eo = {
+const po = "@seneca/redux", ho = "0.0.2", yo = "Seneca browser library for redux", mo = "MIT", go = "dist/seneca-redux.cjs.js", vo = "dist/seneca-redux.es.js", bo = "dist/seneca-redux.d.ts", wo = "src/seneca-redux.ts", Eo = {
   ".": {
     import: "./dist/seneca-redux.es.js",
     require: "./dist/seneca-redux.umd.js"
