@@ -7,6 +7,8 @@ import { ThunkDispatch } from 'redux-thunk';
 import { Tuple } from '@reduxjs/toolkit';
 import { UnknownAction } from 'redux';
 
+declare function entityPrepare(state: any, path: string): void;
+
 declare function Redux(this: any, options: any): {
     name: string;
     exports: {
@@ -28,6 +30,7 @@ declare function Redux(this: any, options: any): {
         };
         errlog: any[];
         msglog: any[];
+        entityPrepare: typeof entityPrepare;
     };
 };
 

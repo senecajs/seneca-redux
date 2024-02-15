@@ -52,6 +52,8 @@ const defaults: SenecaReduxFullOptions = {
 const pname = '@seneca/redux'
 
 
+console.log('SR 1')
+
 function Redux(this: any, options: any) {
   const seneca = this
   const deep = seneca.util.deep
@@ -158,6 +160,8 @@ function Redux(this: any, options: any) {
 
         slotKind.error = null
         slotKind.when = Date.now()
+
+        console.log('SRER', cmd, kind, space, slot, res)
 
         if (isError(res)) {
 
@@ -296,7 +300,7 @@ function Redux(this: any, options: any) {
     })
 
     .add(
-      'aim:app,set:state',
+      'aim:store,set:state',
       {
         section: Skip(String),
         content: Skip(),
@@ -348,19 +352,20 @@ function Redux(this: any, options: any) {
       space,
       slot,
       selectItem: (state: any) => {
-        let root = descend(state.seneca, space)
+        let root = descend(state[name], space)
         return root.item[slot]
       },
       selectList: (state: any) => {
-        let root = descend(state.seneca, space)
+        let root = descend(state[name], space)
         return root.list[slot]
       },
       selectMeta: (state: any, kind: 'item' | 'list') => {
-        let root = descend(state.seneca, space)
+        let root = descend(state[name], space)
         return root.meta[slot][kind]
       }
     }
   }
+
 
   return {
     name: 'Redux',
@@ -370,6 +375,7 @@ function Redux(this: any, options: any) {
       slotSelectors,
       errlog,
       msglog,
+      entityPrepare
     }
   }
 }
