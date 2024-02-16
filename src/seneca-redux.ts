@@ -52,8 +52,6 @@ const defaults: SenecaReduxFullOptions = {
 const pname = '@seneca/redux'
 
 
-console.log('SR 1')
-
 function Redux(this: any, options: any) {
   const seneca = this
   const deep = seneca.util.deep
@@ -144,9 +142,7 @@ function Redux(this: any, options: any) {
         }
 
         let { space, slot } = parseSlot(path)
-        // console.log('ERp', path, space, slot)
         let spaceRoot = descend(state, space, true)
-        // console.log('ERr', kind, JSON.stringify(spaceRoot))
         if (null == spaceRoot) {
           throw new Error('Entity space not prepared: ' + space.join('.'))
         }
@@ -160,8 +156,6 @@ function Redux(this: any, options: any) {
 
         slotKind.error = null
         slotKind.when = Date.now()
-
-        console.log('SRER', cmd, kind, space, slot, res)
 
         if (isError(res)) {
 
@@ -178,7 +172,7 @@ function Redux(this: any, options: any) {
         // Don't store in redux if store$ directive is false
         else if (null != res) {
           if ('load' === cmd || 'save' === cmd) {
-            let item = spaceRoot.item[slot] = { ...res }
+            let item = spaceRoot.item[slot] = { ...res.data$() }
             let list = spaceRoot.list[slot]
 
             let found = false
@@ -197,14 +191,13 @@ function Redux(this: any, options: any) {
               spaceRoot.list[slot] = list.concat({ ...item })
               // list.push({ ...item })
             }
-            // console.log('ITEM', found, list)
 
             slotKind.state = 'load' === cmd ? 'loaded' : 'saved'
           }
 
           else if ('list' === cmd) {
             spaceRoot.list[slot] = res.map((entry: any) => ({
-              ...entry
+              ...(entry.data$())
             }))
             slotKind.state = 'listed'
           }
@@ -322,17 +315,13 @@ function Redux(this: any, options: any) {
       const pattern = args.pattern
       const action = args.action
 
-      // console.log('ADD redux', pattern, action)
-
       if (true === pattern.redux$ && null != action) {
         let origAction = action
         args.action = function(this: any, msg: any, reply: any, meta: any) {
-          // console.log('DISPATCH modifier', msg)
           store.dispatch(modifier(
             {
               modifier: (state: any) => {
                 meta.custom.state = () => state
-                // console.log('ORIGACT', msg, meta.custom)
                 origAction.call(this, msg, reply, meta)
               }
             } as any))
@@ -340,7 +329,6 @@ function Redux(this: any, options: any) {
         Object.defineProperty(args.action, 'name', {
           value: origAction.name + '_redux'
         })
-        // console.log('ADD redux action', args.action)
       }
     }
   })
@@ -409,7 +397,6 @@ function entityPrepare(state: any, path: string) {
     spaceRoot.item[slot] = null
   }
 
-  // console.log('PS A', space, slot)
 }
 
 function parseSlot(path?: string): { space: string[], slot: string } {
