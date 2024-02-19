@@ -173,23 +173,25 @@ function Redux(this: any, options: any) {
         else if (null != res) {
           if ('load' === cmd || 'save' === cmd) {
             let item = spaceRoot.item[slot] = { ...res.data$() }
-            let list = spaceRoot.list[slot]
 
-            let found = false
-            spaceRoot.list[slot] = list.map(
-              (entry: any) => {
-                if (entry.id === item.id) {
-                  found = true
-                  return { ...entry, ...item }
+            if (true !== msg.q?.add$) {
+              let list = spaceRoot.list[slot]
+
+              let found = false
+              spaceRoot.list[slot] = list.map(
+                (entry: any) => {
+                  if (entry.id === item.id) {
+                    found = true
+                    return { ...entry, ...item }
+                  }
+                  else {
+                    return entry
+                  }
                 }
-                else {
-                  return entry
-                }
+              )
+              if (!found) {
+                spaceRoot.list[slot] = list.concat({ ...item })
               }
-            )
-            if (!found) {
-              spaceRoot.list[slot] = list.concat({ ...item })
-              // list.push({ ...item })
             }
 
             slotKind.state = 'load' === cmd ? 'loaded' : 'saved'
