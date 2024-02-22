@@ -2262,7 +2262,7 @@ var Pn = { exports: {} };
   });
 })(Pn);
 var No = Pn.exports;
-const _o = "@seneca/redux", Oo = "0.0.3", ko = "Seneca browser library for redux", xo = "MIT", So = "dist/seneca-redux.cjs.js", $o = "dist/seneca-redux.es.js", Do = "dist/seneca-redux.d.ts", Io = "src/seneca-redux.ts", jo = {
+const _o = "@seneca/redux", Oo = "0.0.4", ko = "Seneca browser library for redux", xo = "MIT", So = "dist/seneca-redux.cjs.js", $o = "dist/seneca-redux.es.js", Do = "dist/seneca-redux.d.ts", Io = "src/seneca-redux.ts", jo = {
   ".": {
     import: "./dist/seneca-redux.es.js",
     require: "./dist/seneca-redux.umd.js"
@@ -2287,10 +2287,10 @@ const _o = "@seneca/redux", Oo = "0.0.3", ko = "Seneca browser library for redux
   "@seneca/gateway": "^1.2.0",
   "@seneca/gateway-express": "^0.11.0",
   "@seneca/repl": "^8.1.1",
-  "@types/react": "^18.2.55",
+  "@types/react": "^18.2.57",
   "@types/react-dom": "^18.2.19",
-  "@typescript-eslint/eslint-plugin": "^7.0.1",
-  "@typescript-eslint/parser": "^7.0.1",
+  "@typescript-eslint/eslint-plugin": "^7.0.2",
+  "@typescript-eslint/parser": "^7.0.2",
   "@vitejs/plugin-react": "^4.2.1",
   "cookie-parser": "^1.4.6",
   "dts-bundle-generator": "^9.3.1",
@@ -2306,8 +2306,8 @@ const _o = "@seneca/redux", Oo = "0.0.3", ko = "Seneca browser library for redux
   "ts-node": "^10.9.2",
   tslib: "^2.6.2",
   typescript: "^5.3.3",
-  vite: "^5.1.3",
-  "vite-plugin-dts": "^3.7.2"
+  vite: "^5.1.4",
+  "vite-plugin-dts": "^3.7.3"
 }, Ao = {
   name: _o,
   version: Oo,
