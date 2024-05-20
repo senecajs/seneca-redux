@@ -7,7 +7,7 @@ var ir = typeof Symbol == "function" && Symbol.observable || "@@observable", nn 
   REPLACE: `@@redux/REPLACE${/* @__PURE__ */ ht()}`,
   PROBE_UNKNOWN_ACTION: () => `@@redux/PROBE_UNKNOWN_ACTION${ht()}`
 }, Ne = sr;
-function Ue(e) {
+function We(e) {
   if (typeof e != "object" || e === null)
     return !1;
   let t = e;
@@ -98,7 +98,7 @@ function vn(e, t, n) {
     };
   }
   function O(b) {
-    if (!Ue(b))
+    if (!We(b))
       throw new Error(process.env.NODE_ENV === "production" ? H(7) : `Actions must be plain objects. Instead, the actual type was: '${ge(b)}'. You may need to add middleware to your store setup to handle dispatching other values, such as 'redux-thunk' to handle dispatching functions. See https://redux.js.org/tutorials/fundamentals/part-4-store#middleware and https://redux.js.org/tutorials/fundamentals/part-6-async-logic#using-the-redux-thunk-middleware for examples.`);
     if (typeof b.type > "u")
       throw new Error(process.env.NODE_ENV === "production" ? H(8) : 'Actions may not have an undefined "type" property. You may have misspelled an action type string constant.');
@@ -170,7 +170,7 @@ function fr(e, t, n, o) {
   const a = Object.keys(t), u = n && n.type === Ne.INIT ? "preloadedState argument passed to createStore" : "previous state received by the reducer";
   if (a.length === 0)
     return "Store does not have a valid reducer. Make sure the argument passed to combineReducers is an object whose values are reducers.";
-  if (!Ue(e))
+  if (!We(e))
     return `The ${u} has unexpected type of "${ge(e)}". Expected argument to be an object with the following keys: "${a.join('", "')}"`;
   const l = Object.keys(e).filter((f) => !t.hasOwnProperty(f) && !o[f]);
   if (l.forEach((f) => {
@@ -226,7 +226,7 @@ function pr(e) {
     return v = v || o.length !== Object.keys(f).length, v ? m : f;
   };
 }
-function Ze(...e) {
+function Qe(...e) {
   return e.length === 0 ? (t) => t : e.length === 1 ? e[0] : e.reduce((t, n) => (...o) => t(n(...o)));
 }
 function hr(...e) {
@@ -239,14 +239,14 @@ function hr(...e) {
       getState: a.getState,
       dispatch: (g, ...v) => u(g, ...v)
     }, f = e.map((g) => g(l));
-    return u = Ze(...f)(a.dispatch), {
+    return u = Qe(...f)(a.dispatch), {
       ...a,
       dispatch: u
     };
   };
 }
 function bn(e) {
-  return Ue(e) && "type" in e && typeof e.type == "string";
+  return We(e) && "type" in e && typeof e.type == "string";
 }
 var wn = Symbol.for("immer-nothing"), on = Symbol.for("immer-draftable"), re = Symbol.for("immer-state"), yr = process.env.NODE_ENV !== "production" ? [
   // All error codes, starting by 0:
@@ -306,9 +306,9 @@ function En(e) {
   const n = Object.hasOwnProperty.call(t, "constructor") && t.constructor;
   return n === Object ? !0 : typeof n == "function" && Function.toString.call(n) === mr;
 }
-function Be(e, t) {
-  nt(e) === 0 ? Object.entries(e).forEach(([n, o]) => {
-    t(n, o, e);
+function Ze(e, t) {
+  nt(e) === 0 ? Reflect.ownKeys(e).forEach((n) => {
+    t(n, e[n], e);
   }) : e.forEach((n, o) => t(o, n, e));
 }
 function nt(e) {
@@ -341,25 +341,32 @@ function bt(e, t) {
     return new Set(e);
   if (Array.isArray(e))
     return Array.prototype.slice.call(e);
-  if (!t && En(e))
-    return je(e) ? { ...e } : Object.assign(/* @__PURE__ */ Object.create(null), e);
-  const n = Object.getOwnPropertyDescriptors(e);
-  delete n[re];
-  let o = Reflect.ownKeys(n);
-  for (let a = 0; a < o.length; a++) {
-    const u = o[a], l = n[u];
-    l.writable === !1 && (l.writable = !0, l.configurable = !0), (l.get || l.set) && (n[u] = {
-      configurable: !0,
-      writable: !0,
-      // could live with !!desc.set as well here...
-      enumerable: l.enumerable,
-      value: e[u]
-    });
+  const n = En(e);
+  if (t === !0 || t === "class_only" && !n) {
+    const o = Object.getOwnPropertyDescriptors(e);
+    delete o[re];
+    let a = Reflect.ownKeys(o);
+    for (let u = 0; u < a.length; u++) {
+      const l = a[u], f = o[l];
+      f.writable === !1 && (f.writable = !0, f.configurable = !0), (f.get || f.set) && (o[l] = {
+        configurable: !0,
+        writable: !0,
+        // could live with !!desc.set as well here...
+        enumerable: f.enumerable,
+        value: e[l]
+      });
+    }
+    return Object.create(je(e), o);
+  } else {
+    const o = je(e);
+    if (o !== null && n)
+      return { ...e };
+    const a = Object.create(o);
+    return Object.assign(a, e);
   }
-  return Object.create(je(e), n);
 }
 function xt(e, t = !1) {
-  return it(e) || ve(e) || !he(e) || (nt(e) > 1 && (e.set = e.add = e.clear = e.delete = vr), Object.freeze(e), t && Be(e, (n, o) => xt(o, !0))), e;
+  return it(e) || ve(e) || !he(e) || (nt(e) > 1 && (e.set = e.add = e.clear = e.delete = vr), Object.freeze(e), t && Object.entries(e).forEach(([n, o]) => xt(o, !0))), e;
 }
 function vr() {
   te(2);
@@ -372,9 +379,9 @@ function _e(e) {
   const t = br[e];
   return t || te(0, e), t;
 }
-var Le;
+var Be;
 function _n() {
-  return Le;
+  return Be;
 }
 function wr(e, t) {
   return {
@@ -394,10 +401,10 @@ function wt(e) {
   Et(e), e.drafts_.forEach(Er), e.drafts_ = null;
 }
 function Et(e) {
-  e === Le && (Le = e.parent_);
+  e === Be && (Be = e.parent_);
 }
 function an(e) {
-  return Le = wr(Le, e);
+  return Be = wr(Be, e);
 }
 function Er(e) {
   const t = e[re];
@@ -418,7 +425,7 @@ function et(e, t, n) {
     return t;
   const o = t[re];
   if (!o)
-    return Be(
+    return Ze(
       t,
       (a, u) => cn(e, o, t, a, u, n)
     ), t;
@@ -430,7 +437,7 @@ function et(e, t, n) {
     o.finalized_ = !0, o.scope_.unfinalizedDrafts_--;
     const a = o.copy_;
     let u = a, l = !1;
-    o.type_ === 3 && (u = new Set(a), a.clear(), l = !0), Be(
+    o.type_ === 3 && (u = new Set(a), a.clear(), l = !0), Ze(
       u,
       (f, g) => cn(e, o, a, f, g, n, l)
     ), tt(e, a, !1), n && e.patches_ && _e("Patches").generatePatches_(
@@ -455,7 +462,7 @@ function cn(e, t, n, o, a, u, l) {
   if (he(a) && !it(a)) {
     if (!e.immer_.autoFreeze_ && e.unfinalizedDrafts_ < 1)
       return;
-    et(e, a), (!t || !t.scope_.parent_) && tt(e, a);
+    et(e, a), (!t || !t.scope_.parent_) && typeof o != "symbol" && Object.prototype.propertyIsEnumerable.call(n, o) && tt(e, a);
   }
 }
 function tt(e, t, n = !1) {
@@ -486,7 +493,7 @@ function Nr(e, t) {
     isManual_: !1
   };
   let a = o, u = St;
-  n && (a = [o], u = We);
+  n && (a = [o], u = Le);
   const { revoke: l, proxy: f } = Proxy.revocable(a, u);
   return o.draft_ = f, o.revoke_ = l, f;
 }
@@ -545,16 +552,16 @@ var St = {
   setPrototypeOf() {
     te(12);
   }
-}, We = {};
-Be(St, (e, t) => {
-  We[e] = function() {
+}, Le = {};
+Ze(St, (e, t) => {
+  Le[e] = function() {
     return arguments[0] = arguments[0][0], t.apply(this, arguments);
   };
 });
-We.deleteProperty = function(e, t) {
-  return process.env.NODE_ENV !== "production" && isNaN(parseInt(t)) && te(13), We.set.call(this, e, t, void 0);
+Le.deleteProperty = function(e, t) {
+  return process.env.NODE_ENV !== "production" && isNaN(parseInt(t)) && te(13), Le.set.call(this, e, t, void 0);
 };
-We.set = function(e, t, n) {
+Le.set = function(e, t, n) {
   return process.env.NODE_ENV !== "production" && t !== "length" && isNaN(parseInt(t)) && te(14), St.set.call(this, e[0], t, n, e[0]);
 };
 function yt(e, t) {
@@ -691,7 +698,7 @@ function xn(e) {
     t.finalized_ = !0, n = bt(e, t.scope_.immer_.useStrictShallowCopy_);
   } else
     n = bt(e, !0);
-  return Be(n, (o, a) => {
+  return Ze(n, (o, a) => {
     Nn(n, o, xn(a));
   }), t && (t.finalized_ = !1), n;
 }
@@ -807,7 +814,7 @@ var Cr = (e, t) => {
     return this.value;
   }
 }, Tr = typeof WeakRef < "u" ? WeakRef : Rr, Ar = 0, dn = 1;
-function Je() {
+function He() {
   return {
     s: Ar,
     v: void 0,
@@ -816,7 +823,7 @@ function Je() {
   };
 }
 function $t(e, t = {}) {
-  let n = Je();
+  let n = He();
   const { resultEqualityCheck: o } = t;
   let a, u = 0;
   function l() {
@@ -829,12 +836,12 @@ function $t(e, t = {}) {
         let z = f.o;
         z === null && (f.o = z = /* @__PURE__ */ new WeakMap());
         const b = z.get(T);
-        b === void 0 ? (f = Je(), z.set(T, f)) : f = b;
+        b === void 0 ? (f = He(), z.set(T, f)) : f = b;
       } else {
         let z = f.p;
         z === null && (f.p = z = /* @__PURE__ */ new Map());
         const b = z.get(T);
-        b === void 0 ? (f = Je(), z.set(T, f)) : f = b;
+        b === void 0 ? (f = He(), z.set(T, f)) : f = b;
       }
     }
     const v = f;
@@ -846,7 +853,7 @@ function $t(e, t = {}) {
     return v.v = m, m;
   }
   return l.clearCache = () => {
-    n = Je(), l.resetResultsCount();
+    n = He(), l.resetResultsCount();
   }, l.resultsCount = () => u, l.resetResultsCount = () => {
     u = 0;
   }, l;
@@ -956,7 +963,7 @@ var Pr = Dn(), zr = Dn, Fr = (...e) => {
 Fr($t);
 var qr = typeof window < "u" && window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ : function() {
   if (arguments.length !== 0)
-    return typeof arguments[0] == "object" ? Ze : Ze.apply(null, arguments);
+    return typeof arguments[0] == "object" ? Qe : Qe.apply(null, arguments);
 }, Br = (e) => e && typeof e.match == "function";
 function Ce(e, t) {
   function n(...o) {
@@ -1144,7 +1151,7 @@ function Yr(e = {}) {
 }
 function Tn(e) {
   const t = typeof e;
-  return e == null || t === "string" || t === "boolean" || t === "number" || Array.isArray(e) || Ue(e);
+  return e == null || t === "string" || t === "boolean" || t === "number" || Array.isArray(e) || We(e);
 }
 function Ot(e, t = "", n = Tn, o, a = [], u) {
   let l;
@@ -1224,7 +1231,7 @@ Take a look at the reducer(s) handling this action type: ${C.type}.
     };
   }
 }
-function Xe(e) {
+function Je(e) {
   return typeof e == "boolean";
 }
 var Jr = () => function(t) {
@@ -1235,18 +1242,18 @@ var Jr = () => function(t) {
     actionCreatorCheck: u = !0
   } = t ?? {};
   let l = new jn();
-  if (n && (Xe(n) ? l.push(Pr) : l.push(zr(n.extraArgument))), process.env.NODE_ENV !== "production") {
+  if (n && (Je(n) ? l.push(Pr) : l.push(zr(n.extraArgument))), process.env.NODE_ENV !== "production") {
     if (o) {
       let f = {};
-      Xe(o) || (f = o), l.unshift(Yr(f));
+      Je(o) || (f = o), l.unshift(Yr(f));
     }
     if (a) {
       let f = {};
-      Xe(a) || (f = a), l.push(Hr(f));
+      Je(a) || (f = a), l.push(Hr(f));
     }
     if (u) {
       let f = {};
-      Xe(u) || (f = u), l.unshift(Ur(f));
+      Je(u) || (f = u), l.unshift(Ur(f));
     }
   }
   return l;
@@ -1298,7 +1305,7 @@ function to(e) {
   let f;
   if (typeof n == "function")
     f = n;
-  else if (Ue(n))
+  else if (We(n))
     f = pr(n);
   else
     throw new Error(process.env.NODE_ENV === "production" ? q(1) : "`reducer` is a required argument, and must be a function or an object of functions that can be passed to combineReducers");
@@ -1312,7 +1319,7 @@ function to(e) {
     g = t();
   if (!me && g.some((T) => typeof T != "function"))
     throw new Error(process.env.NODE_ENV === "production" ? q(4) : "each middleware provided to configureStore must be a function");
-  let v = Ze;
+  let v = Qe;
   a && (v = qr({
     // Enable capture of stack traces for dispatched Redux actions
     trace: !me,
@@ -1625,13 +1632,13 @@ function mo({
     options: m
   } = n, x = a(e, u, m);
   o.exposeAction(t, x), l && o.addCase(x.fulfilled, l), f && o.addCase(x.pending, f), g && o.addCase(x.rejected, g), v && o.addMatcher(x.settled, v), o.exposeCaseReducer(t, {
-    fulfilled: l || Qe,
-    pending: f || Qe,
-    rejected: g || Qe,
-    settled: v || Qe
+    fulfilled: l || Xe,
+    pending: f || Xe,
+    rejected: g || Xe,
+    settled: v || Xe
   });
 }
-function Qe() {
+function Xe() {
 }
 var go = (e, t) => {
   if (typeof e != "function")
@@ -1692,7 +1699,7 @@ var Pn = { exports: {} };
   })(function() {
     var n = {}, o = {};
     Object.defineProperty(o, "__esModule", { value: !0 }), o.Gubu = void 0;
-    const a = Symbol.for("gubu$"), u = { gubu$: a, v$: "7.0.0" }, l = Symbol.for("gubu$nil"), f = /^[A-Z]/, { toString: g } = Object.prototype, v = "gubu", m = "name", x = "nan", O = "never", C = "number", T = "required", z = "array", b = "function", S = "object", $ = "string", k = "boolean", I = "undefined", A = "any", U = "list", F = "instance", V = "null", L = "type", W = "closed", se = "shape", le = "check", ye = "regexp", Re = "Object", Ge = "Array", Ke = "Function", K = "Value", Oe = "Above", Ye = "All", Te = "Below", Fn = "Max", qn = "Min", Bn = "Len", Ln = "One", Wn = "Some", fe = " for property ", de = '"$PATH"', pe = '"$VALUE"', ke = (r) => Object.keys(r), xe = (r, s, c) => Object.defineProperty(r, s, c), ae = (r) => Array.isArray(r), at = (r) => JSON.parse(r), ut = (r, s) => JSON.stringify(r, s);
+    const a = Symbol.for("gubu$"), u = { gubu$: a, v$: "7.0.0" }, l = Symbol.for("gubu$nil"), f = /^[A-Z]/, { toString: g } = Object.prototype, v = "gubu", m = "name", x = "nan", O = "never", C = "number", T = "required", z = "array", b = "function", S = "object", $ = "string", k = "boolean", I = "undefined", A = "any", U = "list", F = "instance", V = "null", L = "type", W = "closed", se = "shape", le = "check", ye = "regexp", Re = "Object", Ue = "Array", Ge = "Function", K = "Value", Oe = "Above", Ke = "All", Te = "Below", Fn = "Max", qn = "Min", Bn = "Len", Ln = "One", Wn = "Some", fe = " for property ", de = '"$PATH"', pe = '"$VALUE"', ke = (r) => Object.keys(r), xe = (r, s, c) => Object.defineProperty(r, s, c), ae = (r) => Array.isArray(r), at = (r) => JSON.parse(r), ut = (r, s) => JSON.stringify(r, s);
     class Un {
       constructor(s, c, y, h) {
         this.match = !1, this.dI = 0, this.nI = 2, this.cI = -1, this.pI = 0, this.sI = -1, this.valType = O, this.isRoot = !1, this.key = "", this.type = O, this.stop = !0, this.nextSibling = !0, this.fromDflt = !1, this.ignoreVal = void 0, this.curerr = [], this.err = [], this.parents = [], this.keys = [], this.path = [], this.root = s, this.vals = [s, -1], this.node = c, this.nodes = [c, -1], this.ctx = y || {}, this.match = !!h;
@@ -1746,7 +1753,7 @@ var Pn = { exports: {} };
           let R = w.node ? w.node() : w;
           d = R.t, w = R.v, D = w, _ = R.r, i = Object.assign({}, R.u), N = [...R.a], M = [...R.b];
         } else
-          Ke === w.constructor.name && f.test(w.name) && (d = F, _ = !0, i.n = (p = (E = w.prototype) === null || E === void 0 ? void 0 : E.constructor) === null || p === void 0 ? void 0 : p.name, i.i = w);
+          Ge === w.constructor.name && f.test(w.name) && (d = F, _ = !0, i.n = (p = (E = w.prototype) === null || E === void 0 ? void 0 : E.constructor) === null || p === void 0 ? void 0 : p.name, i.i = w);
       else
         C === d && isNaN(w) ? d = x : $ === d && w === "" && (i.empty = !0);
       let Y = w == null || S !== d && z !== d ? w : Object.assign({}, w);
@@ -2007,7 +2014,7 @@ var Pn = { exports: {} };
           let w = Object.assign(Object.assign({}, E.ctx), { err: [] });
           d(y, w), 0 < w.err.length && (p = !1);
         }
-        return p || (h.why = Ye, h.err = [ue(E, K + " " + pe + fe + de + " does not satisfy all of: " + r.map((d) => Z(d, null, !0)).join(", "))]), p;
+        return p || (h.why = Ke, h.err = [ue(E, K + " " + pe + fe + de + " does not satisfy all of: " + r.map((d) => Z(d, null, !0)).join(", "))]), p;
       }), s;
     }, Xn = function(...r) {
       let s = P();
@@ -2053,7 +2060,7 @@ var Pn = { exports: {} };
     }, qt = function(r, s) {
       let c = P(this, s);
       return c.b.push(r), c;
-    }, He = function(r, s) {
+    }, Ye = function(r, s) {
       let c = P(this, s);
       return c.a.push(r), c;
     }, Bt = function(r, s) {
@@ -2173,7 +2180,7 @@ var Pn = { exports: {} };
     };
     function P(r, s) {
       let c = ie(r == null || r.window === r || r.global === r ? s : r);
-      return Object.assign(c, { Above: Ht, After: He, Any: be, Before: qt, Below: Jt, Check: Bt, Child: Qt, Closed: Lt, Default: Mt, Define: Wt, Empty: Pt, Exact: Ft, Fault: Tt, Ignore: Vt, Len: Xt, Max: Yt, Min: Kt, Never: zt, Open: Rt, Refer: Ut, Rename: Gt, Required: Ct, Rest: Zt, Skip: At });
+      return Object.assign(c, { Above: Ht, After: Ye, Any: be, Before: qt, Below: Jt, Check: Bt, Child: Qt, Closed: Lt, Default: Mt, Define: Wt, Empty: Pt, Exact: Ft, Fault: Tt, Ignore: Vt, Len: Xt, Max: Yt, Min: Kt, Never: zt, Open: Rt, Refer: Ut, Rename: Gt, Required: Ct, Rest: Zt, Skip: At });
     }
     function ue(r, s, c, y) {
       return ee(c || le, r, 4e3, s, y);
@@ -2197,7 +2204,7 @@ var Pn = { exports: {} };
       try {
         h = ut(r, (E, p) => {
           var d, w;
-          if (s && (p = s(E, p)), p != null && S === typeof p && p.constructor && Re !== p.constructor.name && Ge !== p.constructor.name)
+          if (s && (p = s(E, p)), p != null && S === typeof p && p.constructor && Re !== p.constructor.name && Ue !== p.constructor.name)
             p = g.call(p) === "[object RegExp]" || b === typeof p.toString ? p.toString() : p.constructor.name;
           else if (b === typeof p)
             p = b === typeof Se[p.name] && isNaN(+E) ? void 0 : p.name != null && p.name !== "" ? p.name : Me(p.toString().replace(/[ \t\r\n]+/g, " "));
@@ -2218,7 +2225,7 @@ var Pn = { exports: {} };
     function ft(r) {
       return r == null || S !== typeof r ? r : at(ut(r));
     }
-    const Zn = (r) => ie(Object.assign(Object.assign({}, r), { $: { gubu$: !0 } })), Pe = { Above: Ht, After: He, All: Jn, Any: be, Before: qt, Below: Jt, Check: Bt, Child: Qt, Closed: Lt, Default: Mt, Define: Wt, Empty: Pt, Exact: Ft, Fault: Tt, Func: Yn, Ignore: Vt, Key: Hn, Len: Xt, Max: Yt, Min: Kt, Never: zt, One: Qn, Open: Rt, Optional: Kn, Refer: Ut, Rename: Gt, Required: Ct, Skip: At, Some: Xn, Rest: Zt };
+    const Zn = (r) => ie(Object.assign(Object.assign({}, r), { $: { gubu$: !0 } })), Pe = { Above: Ht, After: Ye, All: Jn, Any: be, Before: qt, Below: Jt, Check: Bt, Child: Qt, Closed: Lt, Default: Mt, Define: Wt, Empty: Pt, Exact: Ft, Fault: Tt, Func: Yn, Ignore: Vt, Key: Hn, Len: Xt, Max: Yt, Min: Kt, Never: zt, One: Qn, Open: Rt, Optional: Kn, Refer: Ut, Rename: Gt, Required: Ct, Skip: At, Some: Xn, Rest: Zt };
     if (I !== typeof window)
       for (let r in Pe)
         xe(Pe[r], m, { value: r });
@@ -2233,7 +2240,7 @@ var Pn = { exports: {} };
         let w = s, D = {}, j = 0, _ = 0;
         for (; j < d.length; j++) {
           let N = p.v[d[j]];
-          N.p && (N = p.v[d[j]] = ((M) => He(function(Y, R, J) {
+          N.p && (N = p.v[d[j]] = ((M) => Ye(function(Y, R, J) {
             if (0 < J.curerr.length) {
               _++;
               for (let B = d.length - 1; B > M; B--)
@@ -2241,7 +2248,7 @@ var Pn = { exports: {} };
               R.uval = void 0, R.done = !1;
             }
             return !0;
-          }, N))(j), N.e = !1), j !== d.length - 1 || p.v[d[j]].m.rest || (p.v[d[j]] = He(function(M, Y, R) {
+          }, N))(j), N.e = !1), j !== d.length - 1 || p.v[d[j]].m.rest || (p.v[d[j]] = Ye(function(M, Y, R) {
             return !(d.length - _ < w.length && (R.curerr.length === 0 && (Y.err = `Too many arguments for type signature (was ${w.length}, expected ${d.length - _})`), Y.fatal = !0, 1));
           }, p.v[d[j]]));
         }
@@ -2283,31 +2290,31 @@ const _o = "@seneca/redux", Oo = "0.0.4", ko = "Seneca browser library for redux
   "repo-publish": "npm run clean && npm i && npm run repo-publish-quick",
   "repo-publish-quick": "npm run build && npm run test && npm run repo-tag && npm publish --access public --registry https://registry.npmjs.org "
 }, To = {
-  "@reduxjs/toolkit": "^2.2.1",
-  "@seneca/gateway": "^1.2.0",
-  "@seneca/gateway-express": "^0.11.0",
-  "@seneca/repl": "^8.1.1",
-  "@types/react": "^18.2.57",
-  "@types/react-dom": "^18.2.19",
-  "@typescript-eslint/eslint-plugin": "^7.0.2",
-  "@typescript-eslint/parser": "^7.0.2",
+  "@reduxjs/toolkit": "^2.2.4",
+  "@seneca/gateway": "^1.2.1",
+  "@seneca/gateway-express": "^0.13.0",
+  "@seneca/repl": "^9.0.1",
+  "@types/react": "^18.3.2",
+  "@types/react-dom": "^18.3.0",
+  "@typescript-eslint/eslint-plugin": "^7.9.0",
+  "@typescript-eslint/parser": "^7.9.0",
   "@vitejs/plugin-react": "^4.2.1",
   "cookie-parser": "^1.4.6",
-  "dts-bundle-generator": "^9.3.1",
-  eslint: "^8.56.0",
+  "dts-bundle-generator": "^9.5.1",
+  eslint: "^8",
   "eslint-config-prettier": "^9.1.0",
   "eslint-plugin-prettier": "^5.1.3",
-  express: "^4.18.2",
+  express: "^4.19.2",
   prettier: "^3.2.5",
-  react: "^18.2.0",
-  seneca: "^3.34.1",
+  react: "^18.3.1",
+  seneca: "^3.36.0",
   "seneca-entity": "^25.1.3",
   "seneca-promisify": "^3.7.1",
   "ts-node": "^10.9.2",
   tslib: "^2.6.2",
-  typescript: "^5.3.3",
-  vite: "^5.1.4",
-  "vite-plugin-dts": "^3.7.3"
+  typescript: "^5.4.5",
+  vite: "^5.2.11",
+  "vite-plugin-dts": "^3.9.1"
 }, Ao = {
   name: _o,
   version: Oo,
@@ -2362,7 +2369,7 @@ function st(e) {
         }), t.act(A));
       },
       entityResponse: (b, S) => {
-        var ye, Re, Ge, Ke;
+        var ye, Re, Ue, Ge;
         let $ = S.payload, k = $.msg, I = $.res, A = k.cmd, U = A === "list" ? "list" : "item";
         f("entity", k, I);
         let F = k.slot$ || ((ye = k.q) == null ? void 0 : ye.slot$) || ((Re = k.ent) == null ? void 0 : Re.slot$);
@@ -2382,11 +2389,11 @@ function st(e) {
         } else if (I != null)
           if (A === "load" || A === "save") {
             let K = W.item[L] = { ...I.data$() };
-            if (((Ge = k.q) == null ? void 0 : Ge.add$) !== !0) {
-              let Oe = W.list[L], Ye = !1;
+            if (((Ue = k.q) == null ? void 0 : Ue.add$) !== !0) {
+              let Oe = W.list[L], Ke = !1;
               W.list[L] = Oe.map(
-                (Te) => Te.id === K.id ? (Ye = !0, { ...Te, ...K }) : Te
-              ), Ye || (W.list[L] = Oe.concat({ ...K }));
+                (Te) => Te.id === K.id ? (Ke = !0, { ...Te, ...K }) : Te
+              ), Ke || (W.list[L] = Oe.concat({ ...K }));
             }
             le.state = A === "load" ? "loaded" : "saved";
           } else
@@ -2394,7 +2401,7 @@ function st(e) {
               ...K.data$()
             })), le.state = "listed");
         else if (A === "remove") {
-          let K = [(Ke = k.q) == null ? void 0 : Ke.id];
+          let K = [(Ge = k.q) == null ? void 0 : Ge.id];
           W.list[L] = W.list[L].filter((Oe) => !K.includes(Oe.id)), W.item[L] && K.includes(W.item[L].id) && (W.item[L] = null, W.meta[L].item.state = "removed");
         } else
           le.state = "done";
